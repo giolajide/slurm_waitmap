@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "slurm_waitmap"
+dynamic = ["version", "readme", "description", "dependencies"]
+requires-python = ">=3.9"
+authors = [
+    {name = "Gbolagade Olajide", email = "giolajide@crimson.ua.edu"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Natural Language :: English",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+keywords = [
+    "slurm",
+    "sacct",
+    "hpc",
+    "high-performance-computing",
+    "cluster",
+    "job-scheduler",
+    "queue",
+    "queue-wait-time",
+    "job-accounting",
+    "resource-allocation",
+    "heatmap",
+    "visualization",
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "slurm_waitmap.__version__"}
+readme = {file = "README.rst", content-type = "text/x-rst"}
+description = {file = "description.rst", content-type = "text/x-rst"}
+dependencies = {file = "requirements.txt"}
+
+[project.scripts]
+slurm-waitmap = "slurm_waitmap.plotter:main"
+
+[project.urls]
+Homepage = "https://github.com/giolajide/slurm_waitmap"
+Issues = "https://github.com/giolajide/slurm_waitmap/issues"
+Documentation = "https://github.com/giolajide/slurm_waitmap/README.rst"
+
