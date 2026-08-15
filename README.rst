@@ -1,3 +1,6 @@
+(This is still in progress; I need to finish writing the pytests section then test extensively)
+
+
 ==============
 Slurm Waitmap
 ==============
