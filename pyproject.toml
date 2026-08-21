@@ -44,7 +44,7 @@ dependencies = {file = "requirements.txt"}
 
 [project.optional-dependencies]
 tests = [
-    "pytest>7,<=9.2",
+    "pytest>=7,<=9.2",
     "ascii-colors",
 ]
 
