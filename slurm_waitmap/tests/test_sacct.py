@@ -1,15 +1,17 @@
 import subprocess
 from unittest.mock import patch
-from slurm_waitmap.plotter import run_sacct
+from slurm_waitmap.plotter import run_sacct, memory_to_gb run_sacct
 import pytest
 import numpy as np
-import memory_to_gb
+
 
 
 def test_run_sacct_success(tmp_path):
-    logfile = tmp_path / "stats.csv"
-    errfile = tmp_path / "stats.err"
+    ##Use temporary files so the test does not overwrite real stats files
+    logfile = tmp_path / "slurm_waitmap_sacct.csv"
+    errfile = tmp_path / "slurm_waitmap_sacct.err"
 
+    ##Mock the timings and sacct call so we only test command construction
     with patch("slurm_waitmap.plotter.LOGFILE", str(logfile)), \
          patch("slurm_waitmap.plotter.ERRFILE", str(errfile)), \
          patch(
@@ -23,8 +25,10 @@ def test_run_sacct_success(tmp_path):
             partitions=["gpu", "cpu"],
         )
 
+    ##Successful sacct call should return 0
     assert exitcode == 0
 
+    ##Check that all requested filters/timings made it into the sacct command
     command = mock_run.call_args.args[0]
 
     assert "sacct" in command
@@ -37,9 +41,11 @@ def test_run_sacct_success(tmp_path):
 
 
 def test_run_sacct_no_filters(tmp_path):
-    logfile = tmp_path / "stats.csv"
-    errfile = tmp_path / "stats.err"
+    ##Use temporary files so the test does not overwrite real stats files
+    logfile = tmp_path / "slurm_waitmap_sacct.csv"
+    errfile = tmp_path / "slurm_waitmap_sacct.err"
 
+    ##No usernames/partitions should make sacct query all users
     with patch("slurm_waitmap.plotter.LOGFILE", str(logfile)), \
          patch("slurm_waitmap.plotter.ERRFILE", str(errfile)), \
          patch(
@@ -55,6 +61,7 @@ def test_run_sacct_no_filters(tmp_path):
 
     assert exitcode == 0
 
+    ##Make sure no user/partition filters were accidentally added
     command = mock_run.call_args.args[0]
 
     assert "--allusers" in command
@@ -63,9 +70,11 @@ def test_run_sacct_no_filters(tmp_path):
 
 
 def test_run_sacct_failure(tmp_path):
-    logfile = tmp_path / "stats.csv"
-    errfile = tmp_path / "stats.err"
+    ##Use temporary files so the test does not overwrite real stats files
+    logfile = tmp_path / "slurm_waitmap_sacct.csv"
+    errfile = tmp_path / "slurm_waitmap_sacct.err"
 
+    ##Force sacct to fail and make sure run_sacct handles the failure
     with patch("slurm_waitmap.plotter.LOGFILE", str(logfile)), \
          patch("slurm_waitmap.plotter.ERRFILE", str(errfile)), \
          patch(
@@ -85,6 +94,7 @@ def test_run_sacct_failure(tmp_path):
             partitions=["gpu"],
         )
 
+    ##Failed sacct call should return 1 rather than crash
     assert exitcode == 1
 
 
