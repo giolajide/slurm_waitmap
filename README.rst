@@ -8,6 +8,7 @@ Slurm Waitmap
 Requirements
 =============
 
+* Slurm accounting enabled and the ``sacct`` command available.
 * numpy>=1.26.4
 * seaborn>=0.12.0
 * pandas>=2.1
@@ -17,12 +18,7 @@ Requirements
 Installation
 =============
 
-First create and activate a new environment::
-
-    mamba create --name minimal_env "python>=3.9,<3.14"
-    mamba activate minimal_env
-
-Then install::
+Run the following command to install::
 
     pip install slurm_waitmap
  
