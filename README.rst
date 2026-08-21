@@ -9,10 +9,10 @@ Requirements
 =============
 
 * Slurm accounting enabled and the ``sacct`` command available.
-* numpy>=1.26.4
-* seaborn>=0.12.0
-* pandas>=2.1
-* matplotlib>=3.8.0
+* numpy>=1.23
+* seaborn>=0.12
+* pandas>=1.5
+* matplotlib>=3.6
 
 
 Installation
