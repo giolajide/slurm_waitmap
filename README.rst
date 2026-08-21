@@ -2,7 +2,7 @@
 Slurm Waitmap
 ==============
 
-`slurm-waitmap` uses Slurm accounting data from `sacct` to visualize how requested CPU count and job time limit affect queue wait times. It generates heatmaps of the average queue wait time and the number of jobs in each resource-request bin, helping users choose job parameters that may reduce time spent waiting in the queue.
+``slurm-waitmap`` uses Slurm accounting data from ``sacct`` to visualize how requested CPU count and job time limit affect queue wait times. It generates heatmaps of the average queue wait time and the number of jobs in each resource-request bin, helping users choose job parameters that may reduce time spent waiting in the queue.
 
 
 Requirements
@@ -29,11 +29,6 @@ Then install::
 
 Usage
 ======
-
-`slurm_waitmap` reads job-accounting data from Slurm using `sacct` and generates two heatmaps:
-
-* average queue wait time as a function of requested CPU count and job time limit;
-* number of jobs in each CPU-count and time-limit bin.
 
 A basic run is::
 
@@ -63,11 +58,11 @@ Options
 Restrict to a time range
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Start and end times must use the format `YYYY-MM-DDTHH:MM`::
+Start and end times must use the format **YYYY-MM-DDTHH:MM** ::
 
     slurm-waitmap --start-time 2026-06-01T00:00 --end-time 2026-07-01T00:00
 
-If neither start-time nor end-time is specified, then we default to the last 7 days
+If neither *start-time* nor *end-time* is specified, then it defaults to the last 14 days
 
 Filter by partition
 ^^^^^^^^^^^^^^^^^^^^
@@ -80,6 +75,8 @@ Analyze multiple partitions::
 
     slurm-waitmap --partitions gpu shared
 
+If *partitions* is not specified, then it defaults to all partitions
+
 Filter by user
 ^^^^^^^^^^^^^^^^
 
@@ -90,6 +87,8 @@ Analyze jobs submitted by one user::
 Analyze jobs submitted by multiple users::
 
     slurm-waitmap --usernames dora spenlow
+
+If *usernames* is not specified, then it defaults to all users
 
 Choose output filenames
 ^^^^^^^^^^^^^^^^^^^^^^^^
