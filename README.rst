@@ -64,7 +64,11 @@ Start and end times must use the format **YYYY-MM-DDTHH:MM** ::
 
     slurm-waitmap --start-time 2026-06-01T00:00 --end-time 2026-07-01T00:00
 
-If neither *start-time* nor *end-time* is specified, then it defaults to the last 14 days
+Notes::
+* If *--start-time* is given but *--end-time* is omitted, it sets *--end-time* to the current moment
+* If *--end-time* is given but *--start-time* is omitted, it sets *--start-time* to 14 days before *--end-time*
+* If neither *--start-time* nor *--end-time* is specified, then it defaults to the last 14 days
+
 
 Filter by partition
 ^^^^^^^^^^^^^^^^^^^^
@@ -77,7 +81,7 @@ Analyze multiple partitions::
 
     slurm-waitmap --partitions gpu shared
 
-If *partitions* is not specified, then it defaults to all partitions
+If *--partitions* is not specified, then it defaults to all partitions
 
 Filter by user
 ^^^^^^^^^^^^^^^^
@@ -90,7 +94,7 @@ Analyze jobs submitted by multiple users::
 
     slurm-waitmap --usernames dora spenlow
 
-If *usernames* is not specified, then it defaults to all users
+If *--usernames* is not specified, then it defaults to all users
 
 Choose output filenames
 ^^^^^^^^^^^^^^^^^^^^^^^^
