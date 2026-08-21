@@ -44,14 +44,14 @@ Example output::
 
 Average queue wait time::
 
-.. image:: https://raw.githubusercontent.com/giolajide/slurm_waitmap/main/docs/wait_times.png
+.. figure:: https://raw.githubusercontent.com/giolajide/slurm_waitmap/main/docs/wait_times.png
    :width: 500
    :alt: Heatmap of average Slurm queue wait times
    :align: center
 
 Number of jobs in each bin::
 
-.. image:: https://raw.githubusercontent.com/giolajide/slurm_waitmap/main/docs/counts.png
+.. figure:: https://raw.githubusercontent.com/giolajide/slurm_waitmap/main/docs/counts.png
    :width: 500
    :align: center
    :alt: Heatmap showing the number of Slurm jobs in each bin
