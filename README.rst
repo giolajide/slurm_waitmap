@@ -46,10 +46,11 @@ Average queue wait time:
 
 .. figure:: https://raw.githubusercontent.com/giolajide/slurm_waitmap/main/docs/wait_times.png
    :width: 500
+   :height: 900
    :alt: Heatmap of average Slurm queue wait times
    :align: center
 
-Number of jobs in each bin::
+Number of jobs in each bin:
 
 .. figure:: https://raw.githubusercontent.com/giolajide/slurm_waitmap/main/docs/counts.png
    :width: 500
