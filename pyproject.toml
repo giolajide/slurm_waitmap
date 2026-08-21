@@ -1,9 +1,11 @@
 [build-system]
-requires = ["setuptools>=61.0.0"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "slurm_waitmap"
+license = "MIT"
+license-files = ["LICENSE"]
 dynamic = ["version", "readme", "description", "dependencies"]
 requires-python = ">=3.9,<3.14"
 authors = [
@@ -50,10 +52,13 @@ tests = [
 
 [project.scripts]
 slurm-waitmap = "slurm_waitmap.plotter:main"
-waitmap-tests = "slurm_waitmap.run_tests:main"
+
+[tool.setuptools.packages.find]
+include = ["slurm_waitmap*"]
+exclude = ["slurm_waitmap.tests*"]
 
 [project.urls]
 Homepage = "https://github.com/giolajide/slurm_waitmap"
 Issues = "https://github.com/giolajide/slurm_waitmap/issues"
-Documentation = "https://github.com/giolajide/slurm_waitmap/README.rst"
+Documentation = "https://github.com/giolajide/slurm_waitmap/blob/main/README.rst"
 
