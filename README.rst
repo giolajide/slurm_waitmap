@@ -64,7 +64,7 @@ Start and end times must use the format **YYYY-MM-DDTHH:MM** ::
 
     slurm-waitmap --start-time 2026-06-01T00:00 --end-time 2026-07-01T00:00
 
-Notes::
+Note:
 
 * If *--start-time* is given but *--end-time* is omitted, it sets *--end-time* to the current moment
 * If *--end-time* is given but *--start-time* is omitted, it sets *--start-time* to 14 days before *--end-time*
