@@ -35,6 +35,7 @@ A basic run is::
     slurm-waitmap
 
 
+
 Example output::
 
 Average queue wait time:
