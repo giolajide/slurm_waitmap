@@ -1,6 +1,8 @@
 import subprocess
 from unittest.mock import patch
 from slurm_waitmap.plotter import run_sacct
+import pytest
+import memory_to_gb
 
 
 def test_run_sacct_success(tmp_path):
@@ -87,7 +89,7 @@ def test_run_sacct_failure(tmp_path):
 
 def test_memory_to_gb():
     ##invalid unit
-    with pytest.arns(UserWarning):
+    with pytest.warns(UserWarning):
         memory_to_gb("753U")
     ##valid unit in TB
     number=746
