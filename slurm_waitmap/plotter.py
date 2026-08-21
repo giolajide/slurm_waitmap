@@ -81,8 +81,8 @@ def decide_on_timings(
         end_time_=datetime.datetime.strptime(end_time, "%Y-%m-%dT%H:%M")
         start_time_=datetime.datetime.strptime(start_time, "%Y-%m-%dT%H:%M")
         dt=start_time_ - end_time_
-        if dt.total_seconds() <= 0:
-            raise ValueError(f"Supplied Start time ({start_time}) <= End time ({end_time})")
+        if start_time_ >= end_time_:
+            raise ValueError(f"Supplied start-time ({start_time}) is >= end-time ({end_time})")
     
     this_moment = datetime.datetime.now()
     reconvert = False
@@ -204,6 +204,10 @@ def memory_to_gb(value: str, verbose: Optional[bool] = VERBOSE) -> float:
     Returns mem in GB as a float
     """
     value = str(value).strip()
+    if not value: ##empty result from slurm?
+        if verbose:
+            warnings.warn("Empty memory value")
+        return np.nan
     unit = value[-1].upper()
     if unit == "K":
         return float(value[:-1]) / (GB_TO_MB**2)
@@ -285,12 +289,10 @@ def get_statistics(
         raise ValueError("No sacct records found for the specified filters.")
 
     # remove invalid records like start="Unknown"
-    start_ = pd.to_datetime(
-        start,
-        errors="coerce",
-        format="%Y-%m-%dT%H:%M:%S",
-    )
-    mask = ~pd.isna(start_)
+    start_ = pd.to_datetime(start, errors="coerce")
+    submit_ = pd.to_datetime(submit, errors="coerce")
+    mask = ~(pd.isna(start_) | pd.isna(submit_))
+    
     reqcpus, numnodes, reqmem_mb, timelimit, submit, start = (
         reqcpus[mask].astype(np.int32),
         numnodes[mask].astype(np.int32),
@@ -299,6 +301,8 @@ def get_statistics(
         submit[mask].astype(str),
         start[mask].astype(str),
     )
+    if len(reqcpus) == 0:
+        raise ValueError("No started jobs found for the specified filters.")
     # convert submit and start into queue wait time in hours
     submit = np.array([datetime.datetime.fromisoformat(i) for i in submit])
     start = np.array([datetime.datetime.fromisoformat(i) for i in start])
@@ -310,7 +314,7 @@ def get_statistics(
         np.char.replace(timelimit, "-", " days ", count=1),
         timelimit,
     )  # replace "15-" with "15 days", for example
-    timelimit_hrs = pd.to_timedelta(timelimit).total_seconds() / 3_600
+    timelimit_hrs = pd.to_timedelta(timelimit, errors="coerce",).total_seconds() / 3_600
 
     #    reqmem_gb = np.array([int(i.removesuffix("M")) / GB_TO_MB for i in reqmem_mb])
     reqmem_gb = np.array([memory_to_gb(i, verbose=verbose) for i in reqmem_mb])
@@ -321,20 +325,21 @@ def get_statistics(
 ######################################## PLOTTING ########################################
 def bins_sanity(
     bins: List[int],
-    bin_type: str = Literal["cpus", "timelimit"]
+    bin_type: Literal["cpus", "timelimit"],
 ) -> Tuple[bool, str]:
     """
     sanity checks for cpu and time bins
     """
-    message = str()
     message_and_checks = {
         f"There must be at least 2 bins for requested {bin_type}": len(bins) < 2,
-        f"There should be no negative values for {bin_type}": any(x <= 0 for x in bins),
-        f"Values should be strictly ascending for {bin_type}": any(a >= b for a, b in zip(cpu_bins, cpu_bins[1:])),
+        f"There should be only positive values for {bin_type}": any(x <= 0 for x in bins),
+        f"Values should be strictly ascending for {bin_type}": any(a >= b for a, b in zip(bins, bins[1:])),
     }
     for message, check in message_and_checks.items():
         if check:
-            return not check, message
+            return False, message
+            
+    return True, str()
 
 
 
@@ -429,6 +434,7 @@ def plot_wait_time(
         values="Wait_hrs",
         aggfunc="mean",
         dropna=False,
+        observed=False,
     )
     counts = df.pivot_table(
         index="CPU_bin",
@@ -436,6 +442,7 @@ def plot_wait_time(
         values="Wait_hrs",
         aggfunc="size",
         dropna=False,
+        observed=False,
     )
     if heatmap.shape != counts.shape:
         raise ValueError("unexpected shape mismatch between heatmap and counts objects")
