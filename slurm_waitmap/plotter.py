@@ -60,8 +60,6 @@ def decide_on_timings(
     Given the user's start and end times, return
         start and end times formatted as I need them
     start_time and end_time (if given) should be in the format YYYY-MM-DDTHH:MM
-
-    TODO: validate that start_time < end_time
     """
     ##basic sanity checks
     #proper formatting
@@ -80,7 +78,6 @@ def decide_on_timings(
     if end_time and start_time:
         end_time_=datetime.datetime.strptime(end_time, "%Y-%m-%dT%H:%M")
         start_time_=datetime.datetime.strptime(start_time, "%Y-%m-%dT%H:%M")
-        dt=start_time_ - end_time_
         if start_time_ >= end_time_:
             raise ValueError(f"Supplied start-time ({start_time}) is >= end-time ({end_time})")
     
@@ -366,10 +363,9 @@ def define_labels(
     ]
     time_labels = [
         f"<{time_bins[0]}",
-        *[f"{time_bins[i]}-{time_bins[i+1]-1}" for i in range(len(time_bins) - 1)],
+        *[f"{time_bins[i]}-<{time_bins[i+1]}" for i in range(len(time_bins) - 1)],
         f"{time_bins[-1]}+",
     ]
-
     cpu_bin_edges = [-np.inf] + cpu_bins + [np.inf]
     time_bin_edges = [-np.inf] + time_bins + [np.inf]
 
@@ -515,7 +511,7 @@ def main() -> None:
         "-s",
         type=str,
         default=START_TIME,
-        help=f"Earliest possible job start time, format: YYYY-MM-DDTHH:MM. Optional. Default = {START_TIME}",
+        help=f"Start of the sacct accounting query window, format: YYYY-MM-DDTHH:MM. Optional. Default = {START_TIME}",
     )
 
     parser.add_argument(
@@ -523,7 +519,7 @@ def main() -> None:
         "-e",
         type=str,
         default=END_TIME,
-        help=f"Latest possible job start time, format: YYYY-MM-DDTHH:MM. Optional. Default = {END_TIME}",
+        help=f"End of the sacct accounting query window, format: YYYY-MM-DDTHH:MM. Optional. Default = {END_TIME}",
     )
 
     parser.add_argument(
