@@ -30,7 +30,7 @@ Then install::
 Usage
 ======
 
-`slurm_waitmap` reads job-accounting data from Slurm using `sacct` and generates two heatmaps::
+`slurm_waitmap` reads job-accounting data from Slurm using `sacct` and generates two heatmaps:
 
 * average queue wait time as a function of requested CPU count and job time limit;
 * number of jobs in each CPU-count and time-limit bin.
