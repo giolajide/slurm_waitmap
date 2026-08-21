@@ -2,6 +2,7 @@ import subprocess
 from unittest.mock import patch
 from slurm_waitmap.plotter import run_sacct
 import pytest
+import numpy as np
 import memory_to_gb
 
 
@@ -98,4 +99,6 @@ def test_memory_to_gb():
     ##valid unit in MB
     result = memory_to_gb(f"{number}M")
     assert result == pytest.approx(number / 1024, abs=1e-4)
-
+    ##unsupported memory units
+    assert np.isnan(memory_to_gb("753Mc"))
+    assert np.isnan(memory_to_gb("753Mn"))
