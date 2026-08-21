@@ -1,6 +1,6 @@
 import pytest
-from slurm_waitmap.plotter import decide_on_timings
-
+from slurm_waitmap.plotter import define_labels
+from math import inf
 
 def test_define_labels():
     ##invalid length of cpu and-or time bins
@@ -12,8 +12,8 @@ def test_define_labels():
         define_labels([1], [1])
     #valid cpu and time bins
     cpu_labels, cpu_bin_edges, time_labels, time_bin_edges = define_labels(
-            [1 2 7 14 21 28],
-            [1 2 24 48],
+            [1, 2, 7, 14, 21, 28],
+            [1, 2, 24, 48],
             )
     assert cpu_labels == ["<1", "1-1", "2-6", "7-13", "14-20", "21-27", "28+"]
     assert cpu_bin_edges  == [-inf, 1, 2, 7, 14, 21, 28, inf]
