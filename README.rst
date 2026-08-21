@@ -39,10 +39,6 @@ A basic run is::
 
     slurm-waitmap
 
-By default, the software reads data on jobs from the last 7 days and writes two PNG files:
-
-* `wait_times.png`
-* `counts.png`
 
 Example output::
 
@@ -70,6 +66,8 @@ Restrict to a time range
 Start and end times must use the format `YYYY-MM-DDTHH:MM`::
 
     slurm-waitmap --start-time 2026-06-01T00:00 --end-time 2026-07-01T00:00
+
+If neither start-time nor end-time is specified, then we default to the last 7 days
 
 Filter by partition
 ^^^^^^^^^^^^^^^^^^^^
