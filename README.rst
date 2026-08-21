@@ -42,7 +42,7 @@ A basic run is::
 
 Example output::
 
-Average queue wait time::
+Average queue wait time:
 
 .. figure:: https://raw.githubusercontent.com/giolajide/slurm_waitmap/main/docs/wait_times.png
    :width: 500
