@@ -32,7 +32,7 @@ A basic run is::
 
 
 
-Example output::
+Example output:
 
 Average queue wait time:
 
@@ -96,7 +96,7 @@ If *--usernames* is not specified, then it defaults to all users
 Choose output filenames
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-Use `--output-heatmap` and `--output-counts` to specify the output filenames::
+Use ``--output-heatmap`` and ``--output-counts`` to specify the output filenames::
 
     slurm-waitmap --output-heatmap average_wait.png --output-counts job_counts.png
 
