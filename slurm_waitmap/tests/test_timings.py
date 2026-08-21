@@ -19,7 +19,11 @@ def test_decide_on_timings():
         decide_on_timings(None, None, True)
     ##test valid values
     start_time, end_time = decide_on_timings("2024-08-06T12:12", "2025-08-06T12:12", False)
-    expected = ["2024-08-06T12:12", "2025-08-06T12:12"]
-    assert expected[0] == start_time
-    assert expected[1] == end_time
-
+    assert start_time == "2024-08-06T12:12"
+    assert end_time == "2025-08-06T12:12"
+    #start time later than end time
+    with pytest.raises(ValueError):
+        decide_on_timings("2026-05-12T12:00", "2026-05-10T12:00", True,)
+    #start time == end time
+    with pytest.raises(ValueError):
+        decide_on_timings("2026-05-12T12:00", "2026-05-12T12:00", True,)
