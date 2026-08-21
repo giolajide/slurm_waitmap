@@ -1,15 +1,13 @@
 """
 Check the queue time for jobs submitted
---------
 mid-2026
---------
 """
 
 import numpy as np
 import warnings
 import shlex
 import subprocess
-from typing import List, Tuple, Optional, Union
+from typing import List, Tuple, Optional, Union, Literal
 import datetime
 import pandas as pd
 import seaborn as sns
@@ -33,8 +31,8 @@ CPU_BINS = [2, 4, 8, 16, 32]  # make sure to be at least 2 elements
 TIME_BINS = [1, 8, 24]  # make sure to be at least 2 elements
 VERBOSE = False
 DEFAULT_DAYS = 14
-ERRFILE = "stats.err"
-LOGFILE = "stats.csv"
+ERRFILE = "slurm_waitmap_sacct.err"
+LOGFILE = "slurm_waitmap_sacct.csv"
 SHOW = False
 FIGSIZE = (11, 8)
 ANNOTATE_PLOT = True
@@ -66,15 +64,26 @@ def decide_on_timings(
     TODO: validate that start_time < end_time
     """
     ##basic sanity checks
-    if end_time and len(end_time) != len(EXPECTED_DATE_FORMAT):
-        raise ValueError(
-            f"End time ({end_time}) not in expected format ({EXPECTED_DATE_FORMAT})"
-        )
-    if start_time and len(start_time) != len(EXPECTED_DATE_FORMAT):
-        raise ValueError(
-            f"Start time ({start_time}) not in expected format ({EXPECTED_DATE_FORMAT})"
-        )
-
+    #proper formatting
+    if end_time:
+        try:
+            datetime.datetime.strptime(end_time, "%Y-%m-%dT%H:%M")
+        except ValueError:
+            raise ValueError(f"End time ({end_time}) not in expected format ({EXPECTED_DATE_FORMAT})")
+    if start_time:
+        try:
+            datetime.datetime.strptime(start_time, "%Y-%m-%dT%H:%M")
+        except ValueError:
+            raise ValueError(f"Start time ({start_time}) not in expected format ({EXPECTED_DATE_FORMAT})")
+            
+    ##check that start-time is before end-time
+    if end_time and start_time:
+        end_time_=datetime.datetime.strptime(end_time, "%Y-%m-%dT%H:%M")
+        start_time_=datetime.datetime.strptime(start_time, "%Y-%m-%dT%H:%M")
+        dt=start_time_ - end_time_
+        if dt.total_seconds() <= 0:
+            raise ValueError(f"Supplied Start time ({start_time}) <= End time ({end_time})")
+    
     this_moment = datetime.datetime.now()
     reconvert = False
     if start_time is None:
@@ -118,8 +127,8 @@ def decide_on_timings(
             f"-{str(end_time.day).zfill(2)}"
             f"T{str(end_time.hour).zfill(2)}:{str(end_time.minute).zfill(2)}"
         )
-    print(start_time, end_time)
-    print(type(start_time), type(end_time))
+#    print(start_time, end_time)
+#    print(type(start_time), type(end_time))
     return start_time, end_time
 
 
@@ -196,15 +205,14 @@ def memory_to_gb(value: str, verbose: Optional[bool] = VERBOSE) -> float:
     """
     value = str(value).strip()
     unit = value[-1].upper()
-    unit_return_dict = {
-        "K": float(value[:-1]) / (GB_TO_MB**2),
-        "M": float(value[:-1]) / GB_TO_MB,
-        "G": float(value[:-1]),
-        "T": float(value[:-1]) * GB_TO_MB,
-    }
-
-    if unit in unit_return_dict:
-        return unit_return_dict[unit]
+    if unit == "K":
+        return float(value[:-1]) / (GB_TO_MB**2)
+    elif unit == "M":
+        return float(value[:-1]) / GB_TO_MB
+    elif unit == "G":
+        return float(value[:-1])
+    elif unit == "T":
+        return float(value[:-1]) * GB_TO_MB
     else:
         #raise ValueError(f"Unrecognized memory format: {value}")
 
@@ -261,7 +269,10 @@ def get_statistics(
     on_bad_lines = "warn"  # such instances that multiple partitions are specified,
     # for example. The user can inspect the line for themselves.
     # Maybe I could fix less handwavingly later, but never you mind, Mrs Brown
-    df = pd.read_csv(LOGFILE, delimiter=",", on_bad_lines=on_bad_lines)
+    try:
+        df = pd.read_csv(LOGFILE, delimiter=",", on_bad_lines=on_bad_lines)
+    except FileNotFoundError:
+        raise FileNotFoundError(f"{LOGFILE} not found. Do you have write permissions?"}
     title = df.columns.to_list()
     if title != EXPECTED_FORMAT:
         raise ValueError(f"{title} is not in the expected format: {EXPECTED_FORMAT}")
@@ -308,6 +319,25 @@ def get_statistics(
 
 
 ######################################## PLOTTING ########################################
+def bins_sanity(
+    bins: List[int],
+    bin_type: str = Literal["cpus", "timelimit"]
+) -> Tuple[bool, str]:
+    """
+    sanity checks for cpu and time bins
+    """
+    message = str()
+    message_and_checks = {
+        f"There must be at least 2 bins for requested {bin_type}": len(bins) < 2,
+        f"There should be no negative values for {bin_type}": any(x <= 0 for x in bins),
+        f"Values should be strictly ascending for {bin_type}": any(a >= b for a, b in zip(cpu_bins, cpu_bins[1:])),
+    }
+    for message, check in message_and_checks.items():
+        if check:
+            return not check, message
+
+
+
 def define_labels(
     cpu_bins: List[int] = CPU_BINS,
     time_bins: List[int] = TIME_BINS,
@@ -316,11 +346,14 @@ def define_labels(
     Given the bins for cpu requirement and time pending,
     define the x and y-axis labels
     """
-    if len(cpu_bins) < 2:
-        raise ValueError(f"There must be at least 2 bins for requested cpus")
-    if len(time_bins) < 2:
-        raise ValueError(f"There must be at least 2 bins for timelimits")
-
+    ##sanity checks
+    sane_cpu_bins, cpu_message = bins_sanity(cpu_bins, "cpus")
+    sane_time_bins, time_message = bins_sanity(time_bins, "timelimit")
+    if sane_cpu_bins is False:
+        raise ValueError(cpu_message)
+    if sane_time_bins is False:
+        raise ValueError(time_message)
+    
     cpu_labels = [
         f"<{cpu_bins[0]}",
         *[f"{cpu_bins[i]}-{cpu_bins[i+1]-1}" for i in range(len(cpu_bins) - 1)],
@@ -503,7 +536,7 @@ def main() -> None:
     )
 
     parser.add_argument(
-        "--cpu_bins",
+        "--cpu-bins",
         "-cb",
         nargs="+",
         type=int,
@@ -511,12 +544,12 @@ def main() -> None:
         help=f"Define bins for cpu counts. Optional. Provide as a space-separated list of at least 2 elements. Default = {CPU_BINS}",
     )
     parser.add_argument(
-        "--time_bins",
+        "--time-bins",
         "-tb",
         nargs="+",
         type=int,
         default=TIME_BINS,
-        help=f"Define bins for queue wait time plotting. Optional. Provide as a space-separated list of at least 2 elements. Default = {TIME_BINS}",
+        help=f"Define bins for requested job time limits. Optional. Provide as a space-separated list of at least 2 elements. Default = {TIME_BINS}",
     )
     parser.add_argument(
         "--output-heatmap",
