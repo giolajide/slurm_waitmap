@@ -272,7 +272,7 @@ def get_statistics(
     try:
         df = pd.read_csv(LOGFILE, delimiter=",", on_bad_lines=on_bad_lines)
     except FileNotFoundError:
-        raise FileNotFoundError(f"{LOGFILE} not found. Do you have write permissions?"}
+        raise FileNotFoundError(f"{LOGFILE} not found. Do you have write permissions?")
     title = df.columns.to_list()
     if title != EXPECTED_FORMAT:
         raise ValueError(f"{title} is not in the expected format: {EXPECTED_FORMAT}")
